@@ -1,30 +1,72 @@
 
-import React, {useState} from "react";
-import {FilterAPI, PublicationsAPI} from "../../../store/api";
-import {useDispatch, useSelector} from "react-redux";
-import {getPublicationType, getSourceRatingTypes, getDepartments} from "../../../store/slices/FilterSlices";
-import {useForm} from "react-hook-form";
-import {fetchAuthorSearch} from "../../../store/slices/AuthorsSlice";
-import {useDebounce} from "use-debounce";
-import {fetchPublicationsSearch, setFilter} from "../../../store/slices/PublicationsSlice";
+import React, { useState } from "react";
+import { FilterAPI, PublicationsAPI } from "../../../store/api";
+import { useDispatch, useSelector } from "react-redux";
+import { getPublicationType, getSourceRatingTypes, getDepartments } from "../../../store/slices/FilterSlices";
+import { useForm } from "react-hook-form";
+import { fetchAuthorSearch } from "../../../store/slices/AuthorsSlice";
+import { useDebounce } from "use-debounce";
+import { fetchPublicationsSearch, setFilter } from "../../../store/slices/PublicationsSlice";
 import style from './PublicationFilter.module.css'
 
 const PublicationFilter = () => {
+    const [whList, setwhiteList] = useState('false');
+    // let rwhList = useRef();
 
-    const {register, formState: {errors}, handleSubmit} = useForm();
+    const [validWac, setvalidWac] = useState('false');
+    // let rvalidWac = useRef();
+
+    const [wacRating, setWacRating] = useState({
+        K1: false,
+        K2: false,
+        K3: false,
+        noСategory: false,
+    });
+    const [whiteList, setWhiteList] = useState({
+        whiteListIN: false,
+        whiteListNotIN: false,
+    });
+    const handleOptionChange = (e) => {
+        if (e.target.value == 4) { // 4 - Journal Citation Reports WoS | ВАК категория
+            setvalidWac(true)
+            console.log("вак")
+        }
+        else setvalidWac(false)
+
+        if (e.target.value == 3) { // 3 - белый список
+            setwhiteList(true)
+            console.log("белый список")
+        }
+        else setwhiteList(false)
+
+    }
+    const handleWacRatingChange = (e) => {
+            setWacRating({
+                ...wacRating,
+                [e.target.name]: e.target.checked,
+            });
+    };
+    const handleWhiteListChange = (e) => {
+        setWhiteList({
+            ...whiteList,
+            [e.target.name]: e.target.checked,
+        });
+    };
+
+    const { register, formState: { errors }, handleSubmit } = useForm();
     const dispatch = useDispatch();
-    const {publicationType, sourceRatingTypes, departments} = useSelector(state => state.filter)
+    const { publicationType, sourceRatingTypes, departments } = useSelector(state => state.filter)
     const [search, setSearch] = useState('');
-    const {authors, count} = useSelector(state => state.authors);
+    const { authors, count } = useSelector(state => state.authors);
     const debouncedSearch = useDebounce(search, 500);
-    const {publications, pageSize} = useSelector(state => state.publications);
+    const { publications, pageSize } = useSelector(state => state.publications);
     let date = new Date().toLocaleDateString('en-ca')
     const state = {
         button: 1
     };
 
     const onSearchChange = (e) => {
-        const {value} = e.target
+        const { value } = e.target
         setSearch(value)
     }
 
@@ -50,13 +92,15 @@ const PublicationFilter = () => {
 
     React.useEffect(() => {
         try {
-            dispatch(fetchAuthorSearch({search, page: 0, pageSize: count}))
+            dispatch(fetchAuthorSearch({ search, page: 0, pageSize: count }))
         } catch (e) {
             console.log(e);
         }
     }, [debouncedSearch[0]])
 
     const onSubmit = (data) => {
+        console.log(data);
+        
         if (data.publicationType === '') {
             data.publicationType = null
         }
@@ -75,6 +119,24 @@ const PublicationFilter = () => {
         if (data.afterTime === '') {
             data.afterTime = date
         }
+        if (data.noСategory === "") {
+            data.noСategory = null
+        }
+        if (data.K1 === undefined) {
+            data.K1 = null
+        }
+        if (data.K2 === undefined) {
+            data.K2 = null
+        }
+        if (data.K3 === undefined) {
+            data.K3 = null
+        }
+        if (data.whiteListIN === undefined) {
+            data.whiteListIN = null
+        }
+        if (data.whiteListNotIN === undefined) {
+            data.whiteListNotIN = null
+        }
         dispatch(setFilter(data))
 
         const sendFilters = async () => {
@@ -83,7 +145,10 @@ const PublicationFilter = () => {
                     search: null, publication_type_id: data.publicationType,
                     author_id: data.authorName, source_rating_type_id: data.SourceRating, department: data.department,
                     from_date: data.beforeTime,
-                    to_date: data.afterTime, page: 0, pageSize
+                    to_date: data.afterTime, page: 0, pageSize,
+
+                    vac_caregory_k1: data.K1, vac_caregory_k2: data.K2, vac_caregory_k3: data.K3, vac_no_caregory: data.noСategory,
+                    white_list_in: data.whiteListIN, white_list_not_in: data.whiteListNotIN
                 }));
             } catch (e) {
                 console.log(e)
@@ -91,7 +156,7 @@ const PublicationFilter = () => {
         }
         if (state.button === 1)
             sendFilters();
-        if (state.button === 2){
+        if (state.button === 2) {
             try {
                 let url = '/api/publication/excel?';
                 if (data.publicationType)
@@ -106,6 +171,20 @@ const PublicationFilter = () => {
                     url += `from_date=${data.beforeTime}&`
                 if (data.afterTime)
                     url += `to_date=${data.afterTime}&`
+                
+                if (data.K1)
+                    url += `vac_caregory_k1=${data.K1}&`
+                if (data.K2)
+                    url += `vac_caregory_k2=${data.K2}&`
+                if (data.K3)
+                    url += `vac_caregory_k3=${data.K3}&`
+                if (data.noСategor)
+                    url += `vac_no_caregory=${data.noСategory}&`
+                if (data.whiteListIN)
+                    url += `white_list_in=${data.whiteListIN}`
+                if (data.whiteListNotIN)
+                    url += `white_list_not_in=${data.whiteListNotIN}&`
+                
                 url += `limit=1000`
                 fetch(url).then(res => {
                     return res.blob();
@@ -118,7 +197,7 @@ const PublicationFilter = () => {
                     a.href = '';
                 })
             }
-            catch (e){
+            catch (e) {
                 console.log(e)
             }
         }
@@ -132,10 +211,10 @@ const PublicationFilter = () => {
                 <div>
                     <label htmlFor="time">Период времени</label>
                     <div>
-                        От: <input className={style.date} {...register("beforeTime")} type={"date"}/>
+                        От: <input className={style.date} {...register("beforeTime")} type={"date"} />
                     </div>
                     <div>
-                        До: <input className={style.date} {...register("afterTime")} type={"date"}/>
+                        До: <input className={style.date} {...register("afterTime")} type={"date"} />
                     </div>
                 </div>
                 <div>
@@ -147,22 +226,105 @@ const PublicationFilter = () => {
                         )}
                     </select>
                 </div>
-                <div>
+                <div 
+                    // {...register("whiteListIN")} {...register("whiteListNotIN")}
+                    // {...register("K1")}{...register("K2")}
+                    // {...register("K3")}{...register("noСategory")}
+                    >
                     <label htmlFor="SourceRating">Рейтинг:</label>
-                    <select className={style.dataName} {...register("SourceRating")}>
+                    <select className={style.dataName} {...register("SourceRating")} onChange={handleOptionChange}>
                         <option>{null}</option>
                         {sourceRatingTypes.map((type, index) =>
-                            <option key={index} value={type.id}>{type.name}</option>
+                            <option key={index} value={type.id} id={type.name}>{type.name}</option>
                         )}
                     </select>
                 </div>
+                        {whList == true &&
+                            <div>
+                        
+                                <label htmlFor="whiteListCategory">Белый список</label>
+                                <br />
+        
+                                <label>
+                                    <input
+                                        {...register("whiteListIN")}
+                                        type="checkbox"
+                                        name="whiteListIN"
+                                        checked={whiteList.whiteListIN}
+                                        onChange={handleWhiteListChange}
+
+                                    />
+                                    Входит
+                                </label>
+                                <br />
+                                <label>
+                                    <input
+                                        {...register("whiteListNotIN")}
+                                        type="checkbox"
+                                        name="whiteListNotIN"
+                                        checked={whiteList.whiteListNotIN}
+                                        onChange={handleWhiteListChange} />
+                                        Не входит
+                                </label>
+                            </div>
+                        }
+        
+                        {validWac == true &&
+                            <div>
+                                <label htmlFor="vacCategory">ВАК категории</label>
+                                <br />
+                                <label>
+                                    <input
+                                        {...register("K1")}
+                                        type="checkbox"
+                                        name="K1"
+                                        checked={wacRating.K1}
+                                        onChange={handleWacRatingChange}
+                                    />
+                                    К1
+                                </label>
+                                <br />
+                                <label>
+                                    <input
+                                        {...register("K2")}
+                                        type="checkbox"
+                                        name="K2"
+                                        checked={wacRating.K2}
+                                        onChange={handleWacRatingChange}
+                                    />
+                                    К2
+                                </label>
+                                <br />
+                                <label>
+                                    <input
+                                        {...register("K3")}
+                                        type="checkbox"
+                                        name="K3"
+                                        checked={wacRating.K3}
+                                        onChange={handleWacRatingChange}
+                                    />
+                                    К3
+                                </label>
+                                <br />
+                                <label>
+                                    <input
+                                        {...register("noСategory")}
+                                        type="checkbox"
+                                        name="noСategory"
+                                        checked={wacRating.noСategory}
+                                        onChange={handleWacRatingChange}
+                                    />
+                                    Без категории
+                                </label>
+                                <br />
+                            </div>
+                        }
                 <div>
                     <label htmlFor="department">Кафедра:</label>
                     <select className={style.dataName} {...register("department")}>
                         <option>{null}</option>
                         {departments.map((type, index) => {
-                            if (type.name !== '')
-                            {
+                            if (type.name !== '') {
                                 return <option key={index} value={type.id}>{type.name}</option>
                             }
                         }
@@ -172,7 +334,7 @@ const PublicationFilter = () => {
                 <div>
                     <label htmlFor="authorName">Автор:</label>
                     <input className={style.dataName} list="authorName" placeholder={"Введите имя автора"} type="search" value={search}
-                           onChange={onSearchChange}/>
+                        onChange={onSearchChange} />
                     <select className={style.dataName} id="authorName" {...register("authorName")}>
                         <option>{null}</option>
                         {authors.map((author, index) =>
@@ -183,10 +345,10 @@ const PublicationFilter = () => {
                     </select>
                 </div>
                 <div>
-                    <input className={style.dataName} type={"submit"} value={"Применить"} onClick={() => (state.button = 1)}/>
+                    <input className={style.dataName} type={"submit"} value={"Применить"} onClick={() => (state.button = 1)} />
                 </div>
                 <div>
-                    <input className={style.dataName} type={"submit"} value={"Скачать в Excel"} onClick={() => (state.button = 2)}/>
+                    <input className={style.dataName} type={"submit"} value={"Скачать в Excel"} onClick={() => (state.button = 2)} />
                 </div>
             </form>
         </div>

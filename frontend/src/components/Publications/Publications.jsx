@@ -26,14 +26,22 @@ const Publications = () => {
     const handlePageClick = (e) => {
         dispatch(fetchPublicationsSearch({search,publication_type_id: data.publicationType,author_id: data.authorName,
             source_rating_type_id: data.SourceRating, department: data.department, from_date: data.beforeTime,
-            to_date: data.afterTime, page: e.selected, pageSize}));
+            to_date: data.afterTime, page: e.selected, pageSize,
+        
+            vac_caregory_k1: data.K1, vac_caregory_k2: data.K2, vac_caregory_k3: data.K3, vac_no_caregory: data.noСategory,
+            white_list_in: data.whiteListIN, white_list_not_in: data.whiteListNotIN
+        }));
     }
 
     React.useEffect(() => {
         if (debouncedSearch[0] !== '') {
             dispatch(fetchPublicationsSearch({search,publication_type_id: data.publicationType,author_id: data.authorName,
                 source_rating_type_id: data.SourceRating, department: data.department,
-                from_date: data.beforeTime, to_date: data.afterTime, page: 0, pageSize}))
+                from_date: data.beforeTime, to_date: data.afterTime, page: 0, pageSize,
+            
+                vac_caregory_k1: data.K1, vac_caregory_k2: data.K2, vac_caregory_k3: data.K3, vac_no_caregory: data.noСategory,
+                white_list_in: data.whiteListIN, white_list_not_in: data.whiteListNotIN
+            }))
         } else {
             dispatch(fetchPublications({page: 0, pageSize}))
         }

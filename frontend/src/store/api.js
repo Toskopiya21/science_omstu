@@ -124,7 +124,10 @@ export const PublicationAPI = {
 export const PublicationsAPI = {
     getPublicationsSearch(search,publication_type_id,author_id,
                           source_rating_type_id, department, from_date, to_date,
-                          page, pageSize=20) {
+                          page, pageSize=20,
+                          vac_caregory_k1, vac_caregory_k2, vac_caregory_k3, vac_no_caregory,
+                          white_list_in, white_list_not_in
+                ) {
         let url = '/api/publication?';
         if (search)
             url += `search=${search}&`
@@ -140,6 +143,19 @@ export const PublicationsAPI = {
             url += `from_date=${from_date}&`
         if (to_date)
             url += `to_date=${to_date}&`
+
+        if (vac_caregory_k1)
+            url += `vac_caregory_k1=${vac_caregory_k1}&`
+        if (vac_caregory_k2)
+            url += `vac_caregory_k2=${vac_caregory_k2}&`
+        if (vac_caregory_k3)
+            url += `vac_caregory_k3=${vac_caregory_k3}&`
+        if (vac_no_caregory)
+            url += `vac_no_caregory=${vac_no_caregory}&`
+        if (white_list_in)
+            url += `white_list_in=${white_list_in}`
+        if (white_list_not_in)
+            url += `white_list_not_in=${white_list_not_in}&`
 
         return instance.get(`${url}page=${page}&limit=${pageSize}`)
     },
@@ -163,6 +179,20 @@ export const PublicationsAPI = {
             url += `from_date=${from_date}&`
         if (to_date)
             url += `to_date=${to_date}`
+
+        // if (vac_caregory_k1)
+        //     url += `vac_caregory_k1=${vac_caregory_k1}&`
+        // if (vac_caregory_k2)
+        //     url += `vac_caregory_k2=${vac_caregory_k2}&`
+        // if (vac_caregory_k3)
+        //     url += `vac_caregory_k3=${vac_caregory_k3}&`
+        // if (vac_no_caregory)
+        //     url += `vac_no_caregory=${vac_no_caregory}&`
+        // if (white_list_in)
+        //     url += `white_list_in=${white_list_in}`
+        // if (white_list_not_in)
+        //     url += `white_list_not_in=${white_list_not_in}&`
+        
         return instance.get(`${url}&limit=1000`)
     }
 }

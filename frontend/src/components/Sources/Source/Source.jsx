@@ -70,7 +70,7 @@ const Dropdown = (source_rating) => {
     return (
             <div ><div className={style.blockRating} onClick={handleChangeOpen}>
                 <div>{source_rating.source_rating.source_rating_type.name}</div>
-
+                {/* Категории */}
                 <div>{source_rating.source_rating.rating === null ? null : source_rating.source_rating.rating}</div>
 
 

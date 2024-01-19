@@ -13,11 +13,19 @@ export const fetchPublications = createAsyncThunk(
 export const fetchPublicationsSearch = createAsyncThunk(
     "publications/fetchPublicationsSearch", async ({search,publication_type_id,author_id,
                                                        source_rating_type_id, department, from_date, to_date,
-                                                       page, pageSize}, {rejectWithValue}) => {
+                                                       page, pageSize,
+                                                                                                           
+                vac_caregory_k1, vac_caregory_k2, vac_caregory_k3, vac_caregory_k4,
+                white_list_in, white_list_not_in
+                                                    }, {rejectWithValue}) => {
         try {
             const res = await PublicationsAPI.getPublicationsSearch(search,publication_type_id,author_id,
                 source_rating_type_id, department, from_date, to_date,
-                page, pageSize)
+                page, pageSize,
+                
+                vac_caregory_k1, vac_caregory_k2, vac_caregory_k3, vac_caregory_k4,
+                white_list_in, white_list_not_in
+                )
             return res.data;
         } catch (err) {
             return rejectWithValue([], err);
